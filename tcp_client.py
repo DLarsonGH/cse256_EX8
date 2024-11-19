@@ -35,6 +35,7 @@ GitHub repository: https://github.com/DLarsonGH/cse256_EX8
 # TCP Client Example
 
 import socket
+import time
 
 # Test messages to be sent to the server
 msgs = ['ABCDEFG123456789',
@@ -67,15 +68,25 @@ def start_client():
     # Define the server address and port to connect to
     host = 'localhost'  # Server address
     port = 12345  # Port number
-    print(f"client: attempting to connect to {host}:{port}  ...")
-    try:
-        # Connect to the server
-        client_socket.connect((host, port))
-        print(f"client: connected to {host}:{port}  ...")
-    except Exception as e:
-        # Something is wrong, report and exit.
-        print(f"client: An error occurred: {e}")
-        exit(1)
+    MAX_CONNECT_TRIES = 3
+    connect_tries = 0
+    # Try connecting to server.  Try several time before giving up.
+    while True:
+        connect_tries += 1
+        print(f"client: attempting to connect to {host}:{port}  ...")
+        try:
+            # Connect to the server
+            client_socket.connect((host, port))
+            print(f"client: connected to {host}:{port}  ...")
+            break
+        except Exception as e:
+            # Something is wrong, report and exit.
+            print(f"client: An error occurred: {e}")
+            if connect_tries <= MAX_CONNECT_TRIES:
+                time.sleep(2)
+            else:
+                # Too many retries, bail out
+                exit(1)
 
     # Loop through the list of messages, sending and verifying each.
     for i, message in enumerate(msgs):
